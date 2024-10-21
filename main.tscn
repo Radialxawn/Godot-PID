@@ -1,0 +1,383 @@
+[gd_scene load_steps=11 format=3 uid="uid://cb703iasv4xtu"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_kgok3"]
+[ext_resource type="Texture2D" uid="uid://cg1d5aw231jsm" path="res://flywheel.png" id="2_f7rg7"]
+[ext_resource type="Script" path="res://slider_input.gd" id="2_kuqbg"]
+[ext_resource type="Script" path="res://graph.gd" id="3_a3q30"]
+[ext_resource type="AudioStream" uid="uid://ljqw2cgyifmn" path="res://engine.wav" id="4_8hrj5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ejtsy"]
+
+[sub_resource type="Gradient" id="Gradient_ohfx5"]
+offsets = PackedFloat32Array(0, 0.888889, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fo8bh"]
+gradient = SubResource("Gradient_ohfx5")
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_3iukr"]
+offsets = PackedFloat32Array(0, 0.2, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 0, 0.937005, 0.937005, 0.937005, 1, 0.85446, 0.85446, 0.85446, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_y4ecw"]
+gradient = SubResource("Gradient_3iukr")
+width = 16
+height = 16
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[node name="main" type="Control" node_paths=PackedStringArray("_input_throttle", "_input_load", "_input_set_rpm", "_input_p", "_input_i", "_input_d", "_output_spindle", "_output_engine_status", "_output_hz", "_output_pid_status", "_output_audio_stream_player", "_pid_start_stop", "_graph_rpm", "_graph_throttle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_kgok3")
+_input_throttle = NodePath("engine/throttle")
+_input_load = NodePath("engine/load")
+_input_set_rpm = NodePath("engine/set_rpm")
+_input_p = NodePath("pid/p")
+_input_i = NodePath("pid/i")
+_input_d = NodePath("pid/d")
+_output_spindle = NodePath("spindle")
+_output_engine_status = NodePath("engine_status")
+_output_hz = NodePath("hz")
+_output_pid_status = NodePath("pid_status")
+_output_audio_stream_player = NodePath("audio_stream_player")
+_pid_start_stop = NodePath("pid_start_stop")
+_graph_rpm = NodePath("graph_rpm")
+_graph_throttle = NodePath("graph_throttle")
+
+[node name="engine" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_right = 200.0
+offset_bottom = 120.0
+grow_horizontal = 2
+
+[node name="throttle" type="HBoxContainer" parent="engine" node_paths=PackedStringArray("_slider", "_value_label")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_kuqbg")
+_slider = NodePath("throttle")
+_value_label = NodePath("value")
+
+[node name="label" type="Label" parent="engine/throttle"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "THROTTLE"
+
+[node name="throttle" type="HSlider" parent="engine/throttle"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+max_value = 1.0
+step = 0.001
+value = 0.5
+
+[node name="value" type="Label" parent="engine/throttle"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0.5"
+horizontal_alignment = 2
+
+[node name="load" type="HBoxContainer" parent="engine" node_paths=PackedStringArray("_slider", "_value_label")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_kuqbg")
+_slider = NodePath("load")
+_value_label = NodePath("value")
+
+[node name="label" type="Label" parent="engine/load"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "LOAD"
+
+[node name="load" type="HSlider" parent="engine/load"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+max_value = 1.0
+step = 0.01
+
+[node name="value" type="Label" parent="engine/load"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0.5
+"
+horizontal_alignment = 2
+
+[node name="set_rpm" type="HBoxContainer" parent="engine" node_paths=PackedStringArray("_slider", "_value_label")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_kuqbg")
+_slider = NodePath("set_rpm")
+_value_label = NodePath("value")
+
+[node name="label" type="Label" parent="engine/set_rpm"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "SET RPM"
+
+[node name="set_rpm" type="HSlider" parent="engine/set_rpm"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+max_value = 5000.0
+step = 100.0
+value = 3000.0
+
+[node name="value" type="Label" parent="engine/set_rpm"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "3000"
+horizontal_alignment = 2
+
+[node name="spindle" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -227.0
+offset_top = -64.0
+offset_right = -99.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(64, 64)
+texture = ExtResource("2_f7rg7")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="pid_start_stop" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -195.0
+offset_top = 343.0
+offset_right = -131.0
+offset_bottom = 376.0
+grow_horizontal = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ejtsy")
+text = "PID ON"
+
+[node name="pid" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -120.0
+offset_right = 150.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="p" type="HBoxContainer" parent="pid" node_paths=PackedStringArray("_slider", "_value_label")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_kuqbg")
+_slider = NodePath("p")
+_value_label = NodePath("value")
+
+[node name="label" type="Label" parent="pid/p"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "P"
+
+[node name="p" type="HSlider" parent="pid/p"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+max_value = 1.0
+step = 0.01
+value = 0.1
+
+[node name="value" type="Label" parent="pid/p"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0.1"
+horizontal_alignment = 2
+
+[node name="i" type="HBoxContainer" parent="pid" node_paths=PackedStringArray("_slider", "_value_label")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_kuqbg")
+_slider = NodePath("i")
+_value_label = NodePath("value")
+
+[node name="label" type="Label" parent="pid/i"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "I"
+
+[node name="i" type="HSlider" parent="pid/i"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+max_value = 1.0
+step = 0.01
+value = 0.3
+
+[node name="value" type="Label" parent="pid/i"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0.1"
+horizontal_alignment = 2
+
+[node name="d" type="HBoxContainer" parent="pid" node_paths=PackedStringArray("_slider", "_value_label")]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_kuqbg")
+_slider = NodePath("d")
+_value_label = NodePath("value")
+
+[node name="label" type="Label" parent="pid/d"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "D"
+
+[node name="d" type="HSlider" parent="pid/d"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="value" type="Label" parent="pid/d"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0.1"
+horizontal_alignment = 2
+
+[node name="graph_rpm" type="NinePatchRect" parent="." node_paths=PackedStringArray("_line")]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -325.0
+offset_top = -100.0
+offset_right = -25.0
+offset_bottom = 100.0
+grow_horizontal = 0
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_fo8bh")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+script = ExtResource("3_a3q30")
+_line = NodePath("line")
+
+[node name="line" type="Line2D" parent="graph_rpm"]
+position = Vector2(0, -4.45)
+scale = Vector2(1, 1.05)
+points = PackedVector2Array(4, 8.04761, 296, 190.905)
+width = 2.0
+default_color = Color(1, 0.469494, 0.401435, 1)
+texture = SubResource("GradientTexture2D_y4ecw")
+texture_mode = 1
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="graph_throttle" type="Control" parent="." node_paths=PackedStringArray("_line")]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -325.0
+offset_top = -100.0
+offset_right = -25.0
+offset_bottom = 100.0
+grow_horizontal = 0
+grow_vertical = 2
+script = ExtResource("3_a3q30")
+_line = NodePath("line")
+
+[node name="line" type="Line2D" parent="graph_throttle"]
+position = Vector2(0, -4.45)
+scale = Vector2(1, 1.05)
+points = PackedVector2Array(4, 8.04761, 296, 190.905)
+width = 2.0
+default_color = Color(0.544645, 0.643409, 0.92259, 1)
+texture = SubResource("GradientTexture2D_y4ecw")
+texture_mode = 1
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="engine_status" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 220.0
+offset_top = 79.0
+offset_right = 312.0
+offset_bottom = 96.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "ENGINE STATUS"
+
+[node name="hz" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -47.0
+offset_top = -95.0
+offset_right = -32.0
+offset_bottom = -78.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "Hz"
+horizontal_alignment = 2
+
+[node name="pid_status" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 220.0
+offset_top = -95.0
+offset_right = 312.0
+offset_bottom = -78.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "PID STATUS"
+
+[node name="audio_listener" type="AudioListener2D" parent="."]
+
+[node name="audio_stream_player" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_8hrj5")
+
+[node name="label" type="Label" parent="."]
+offset_left = 67.0
+offset_top = 175.0
+offset_right = 147.0
+offset_bottom = 198.0
+text = "PRESS \"S\""
+horizontal_alignment = 1
