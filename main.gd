@@ -14,8 +14,7 @@ extends Control
 @export var _output_audio_stream_player: AudioStreamPlayer2D
 
 @export var _pid_start_stop: Button
-@export var _graph_rpm: Graph
-@export var _graph_throttle: Graph
+@export var _graph: Graph
 
 var _error_rate: float
 var _error_rate_reset_msec: int
@@ -29,11 +28,11 @@ var _pid: PID
 
 func _ready() -> void:
 	_engine = CombustionEngine.new()
-	_engine.data_set(0.35, 39.52, 25.3, CombustionEngine.rpm_to_omega(3600.0), 0.012, 0.0015)
+	_engine.data_set(0.35, 15.0, 0.012, 0.015, Vector3(800.0, 3600.0, 4400.0), Vector2(33.9, 40.6), Vector2(0.8, 0.2))
 	_pid = PID.new()
 	_pid.data_set(50, 1000)
 	_input_throttle.initialize("%.3f", 1.0)
-	_input_load.initialize("%.2f N-m", 100.0)
+	_input_load.initialize("%.2f N-m", _engine._τ_load_max)
 	_input_set_rpm.initialize("%d", 1.0)
 	_input_p.initialize("%.3f", 0.1)
 	_input_i.initialize("%.3f", 0.1)
@@ -46,8 +45,14 @@ func _ready() -> void:
 	_engine.active = true
 	_pid.active = true
 	_pid_start_stop.pressed.emit()
-	_graph_rpm.initialize()
-	_graph_throttle.initialize()
+	_graph.initialize()
+	_graph.set_color(0, Color.ROYAL_BLUE)
+	_graph.set_color(1, Color.INDIAN_RED)
+	_graph.set_color(2, Color.SEA_GREEN)
+	await get_tree().process_frame
+	for i in Graph.POINT_COUNT:
+		var t: float = float(i) / Graph.POINT_COUNT
+		_graph.update_static(2, t, max(0.0, _engine.τ_combustion_curve.sample(t) - _engine.τ_μ_normalized(t)))
 
 func _process(_dt_: float) -> void:
 	if Input.is_key_pressed(KEY_S):
@@ -88,8 +93,8 @@ func _output_update(_dt_: float) -> void:
 	_output_audio_stream_player.pitch_scale = remap(CombustionEngine.omega_to_rpm(_engine.ω), 0.0, 5000.0, 0.1, 2.0)
 	_output_audio_stream_player.volume_db = remap(_input_throttle.value, 0.0, 1.0, -1.0, 0.0)
 	_pid_status_update()
-	_graph_throttle.update(_input_throttle.value)
-	_graph_rpm.update(_engine.ω / CombustionEngine.rpm_to_omega(5000.0))
+	_graph.update_dynamic(0, _input_throttle.value)
+	_graph.update_dynamic(1, _engine.ω / CombustionEngine.rpm_to_omega(5000.0))
 
 func _pid_status_update() -> void:
 	_output_pid_status.text = "EI: %.1f" % _pid.error_i

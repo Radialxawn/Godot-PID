@@ -31,7 +31,7 @@ height = 16
 fill_from = Vector2(0.5, 0)
 fill_to = Vector2(0.5, 1)
 
-[node name="main" type="Control" node_paths=PackedStringArray("_input_throttle", "_input_load", "_input_set_rpm", "_input_p", "_input_i", "_input_d", "_output_spindle", "_output_engine_status", "_output_hz", "_output_pid_status", "_output_audio_stream_player", "_pid_start_stop", "_graph_rpm", "_graph_throttle")]
+[node name="main" type="Control" node_paths=PackedStringArray("_input_throttle", "_input_load", "_input_set_rpm", "_input_p", "_input_i", "_input_d", "_output_spindle", "_output_engine_status", "_output_hz", "_output_pid_status", "_output_audio_stream_player", "_pid_start_stop", "_graph")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,8 +51,7 @@ _output_hz = NodePath("hz")
 _output_pid_status = NodePath("pid_status")
 _output_audio_stream_player = NodePath("audio_stream_player")
 _pid_start_stop = NodePath("pid_start_stop")
-_graph_rpm = NodePath("graph_rpm")
-_graph_throttle = NodePath("graph_throttle")
+_graph = NodePath("graph")
 
 [node name="engine" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -264,7 +263,7 @@ layout_mode = 2
 text = "0.1"
 horizontal_alignment = 2
 
-[node name="graph_rpm" type="NinePatchRect" parent="." node_paths=PackedStringArray("_line")]
+[node name="graph" type="NinePatchRect" parent="." node_paths=PackedStringArray("_line")]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -285,39 +284,12 @@ patch_margin_bottom = 8
 script = ExtResource("3_a3q30")
 _line = NodePath("line")
 
-[node name="line" type="Line2D" parent="graph_rpm"]
+[node name="line" type="Line2D" parent="graph"]
 position = Vector2(0, -4.45)
 scale = Vector2(1, 1.05)
 points = PackedVector2Array(4, 8.04761, 296, 190.905)
 width = 2.0
 default_color = Color(1, 0.469494, 0.401435, 1)
-texture = SubResource("GradientTexture2D_y4ecw")
-texture_mode = 1
-begin_cap_mode = 2
-end_cap_mode = 2
-
-[node name="graph_throttle" type="Control" parent="." node_paths=PackedStringArray("_line")]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -325.0
-offset_top = -100.0
-offset_right = -25.0
-offset_bottom = 100.0
-grow_horizontal = 0
-grow_vertical = 2
-script = ExtResource("3_a3q30")
-_line = NodePath("line")
-
-[node name="line" type="Line2D" parent="graph_throttle"]
-position = Vector2(0, -4.45)
-scale = Vector2(1, 1.05)
-points = PackedVector2Array(4, 8.04761, 296, 190.905)
-width = 2.0
-default_color = Color(0.544645, 0.643409, 0.92259, 1)
 texture = SubResource("GradientTexture2D_y4ecw")
 texture_mode = 1
 begin_cap_mode = 2
@@ -375,6 +347,7 @@ text = "PID STATUS"
 stream = ExtResource("4_8hrj5")
 
 [node name="label" type="Label" parent="."]
+layout_mode = 0
 offset_left = 67.0
 offset_top = 175.0
 offset_right = 147.0
