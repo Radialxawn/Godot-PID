@@ -1,5 +1,7 @@
 extends Control
 
+@export var _fps: Label
+
 @export var _input_throttle: SliderInput
 @export var _input_load: SliderInput
 @export var _input_set_rpm: SliderInput
@@ -49,14 +51,16 @@ func _ready() -> void:
 	_graph.set_color(0, Color.ROYAL_BLUE)
 	_graph.set_color(1, Color.INDIAN_RED)
 	_graph.set_color(2, Color.SEA_GREEN)
+	_graph.set_color(3, Color.ORANGE)
 	await get_tree().process_frame
 	for i in Graph.POINT_COUNT:
 		var t: float = float(i) / Graph.POINT_COUNT
 		_graph.update_static(2, t, max(0.0, _engine.τ_combustion_curve.sample(t) - _engine.τ_μ_normalized(t)))
+		_graph.update_static(3, t, max(0.0, _engine.w_normalized(t)))
 
-func _process(_dt_: float) -> void:
+func _physics_process(_dt_: float) -> void:
 	if Input.is_key_pressed(KEY_S):
-		_engine.τ_starter = 100.0
+		_engine.τ_starter = _engine.τ_load_max
 	else:
 		_engine.τ_starter = 0.0
 	_engine.process(_dt_)
@@ -66,6 +70,9 @@ func _process(_dt_: float) -> void:
 		_input_throttle.value = lerp(_input_throttle.value, _pid.value, 0.5)
 	_engine.throttle = _input_throttle.value
 	_engine.τ_load_static = _input_load.value
+
+func _process(_dt_: float) -> void:
+	_fps.text = "%d" % Engine.get_frames_per_second()
 	_output_update(_dt_)
 
 func _collect_data(_dt_: float) -> void:

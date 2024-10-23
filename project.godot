@@ -29,6 +29,10 @@ window/size/viewport_width=540
 window/size/viewport_height=540
 window/size/resizable=false
 
+[physics]
+
+common/physics_ticks_per_second=50
+
 [rendering]
 
 renderer/rendering_method="mobile"

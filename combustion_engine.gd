@@ -17,6 +17,8 @@ var _τ_μ_base: float
 var _τ_load_max: float
 var _ω_idle_peak_max: Vector3
 var _τ_idle_peak: Vector2
+var _τ_peak_at_ω: Array[float]
+var _w_peak_at_ω_and_τ: Array[float]
 
 var ω: float:
 	get():
@@ -61,21 +63,21 @@ func data_set(_inertia_: float,
 	_τ_combustion_curve.add_point(Vector2(_ω_idle_peak_max[2] * _τ_combustion_curve_factor.x, 0.0))
 	_τ_combustion_curve.set_point_right_tangent(1, _bias_[0])
 	_τ_combustion_curve.set_point_left_tangent(2, _bias_[1])
-	var τ_peak_at_ω := [0.0, 0.0]
-	var w_peak_at_ω_and_τ := [0.0, 0.0, 0.0]
+	_τ_peak_at_ω = [0.0, 0.0]
+	_w_peak_at_ω_and_τ = [0.0, 0.0, 0.0]
 	for i in 100:
 		var t: float = float(i) / 100.0
 		var t_τ: float = (_τ_combustion_curve.sample(t) - τ_μ_normalized(t)) * _τ_combustion_curve_factor.y
 		var t_ω: float = t * _ω_idle_peak_max[2]
-		if t_τ > τ_peak_at_ω[0]:
-			τ_peak_at_ω[0] = t_τ
-			τ_peak_at_ω[1] = omega_to_rpm(t_ω)
+		if t_τ > _τ_peak_at_ω[0]:
+			_τ_peak_at_ω[0] = t_τ
+			_τ_peak_at_ω[1] = omega_to_rpm(t_ω)
 		var w: float = t_τ * t_ω
-		if w > w_peak_at_ω_and_τ[0]:
-			w_peak_at_ω_and_τ[0] = w
-			w_peak_at_ω_and_τ[1] = omega_to_rpm(t_ω)
-			w_peak_at_ω_and_τ[2] = t_τ
-	_τ_load_max = τ_peak_at_ω[0]
+		if w > _w_peak_at_ω_and_τ[0]:
+			_w_peak_at_ω_and_τ[0] = w
+			_w_peak_at_ω_and_τ[1] = omega_to_rpm(t_ω)
+			_w_peak_at_ω_and_τ[2] = t_τ
+	_τ_load_max = _τ_peak_at_ω[0]
 
 func process(_Δt_: float) -> void:
 	if not active:
@@ -93,6 +95,11 @@ func τ_μ(_ω_: float) -> float:
 
 func τ_μ_normalized(_t_: float) -> float:
 	return τ_μ(_t_ * _ω_idle_peak_max[2]) / _τ_combustion_curve_factor.y
+
+func w_normalized(_t_: float) -> float:
+	var t_ω: float = _t_ * _ω_idle_peak_max[2]
+	var t_τ: float = (_τ_combustion_curve.sample(_t_) - τ_μ_normalized(_t_)) * _τ_combustion_curve_factor.y
+	return (t_τ * t_ω) / _w_peak_at_ω_and_τ[0]
 
 func τ_load() -> float:
 	return clampf(_ω * 1e2, 0.0, 1.0) * τ_load_static + τ_load_dynamic

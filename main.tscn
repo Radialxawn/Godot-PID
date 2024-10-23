@@ -31,7 +31,7 @@ height = 16
 fill_from = Vector2(0.5, 0)
 fill_to = Vector2(0.5, 1)
 
-[node name="main" type="Control" node_paths=PackedStringArray("_input_throttle", "_input_load", "_input_set_rpm", "_input_p", "_input_i", "_input_d", "_output_spindle", "_output_engine_status", "_output_hz", "_output_pid_status", "_output_audio_stream_player", "_pid_start_stop", "_graph")]
+[node name="main" type="Control" node_paths=PackedStringArray("_fps", "_input_throttle", "_input_load", "_input_set_rpm", "_input_p", "_input_i", "_input_d", "_output_spindle", "_output_engine_status", "_output_hz", "_output_pid_status", "_output_audio_stream_player", "_pid_start_stop", "_graph")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,6 +39,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_kgok3")
+_fps = NodePath("fps")
 _input_throttle = NodePath("engine/throttle")
 _input_load = NodePath("engine/load")
 _input_set_rpm = NodePath("engine/set_rpm")
@@ -52,6 +53,18 @@ _output_pid_status = NodePath("pid_status")
 _output_audio_stream_player = NodePath("audio_stream_player")
 _pid_start_stop = NodePath("pid_start_stop")
 _graph = NodePath("graph")
+
+[node name="fps" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = -25.0
+offset_right = 24.0
+offset_bottom = -2.0
+grow_vertical = 0
+text = "60"
 
 [node name="engine" type="VBoxContainer" parent="."]
 layout_mode = 1
