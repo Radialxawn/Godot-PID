@@ -18,14 +18,11 @@ var m: float:
 
 var _v: float
 var _ω: float
-var _usec: int
 
 func _init(_v_: float) -> void:
 	_v = _v_
 
-func process(_Δt_: float, _usec_: int, _τ_static_: float, _τ_dynamic_: float) -> void:
-	_Δt_ = minf((_usec_ - _usec) * 1e-6, _Δt_)
-	_usec = _usec_
+func process(_Δt_: float, _τ_static_: float, _τ_dynamic_: float) -> void:
 	var Δω_static: float = (_τ_static_ / _v) * _Δt_
 	var Δω_dynamic: float = (_τ_dynamic_ / _v) * _Δt_
 	_ω = signf(_ω) * max(abs(_ω) - Δω_static, 0.0)

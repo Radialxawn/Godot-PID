@@ -25,10 +25,12 @@ var _omega_error: float
 var _omega_last: float
 var _omega_acceleration: float
 
+var _usec_last: int
 var _engine: CombustionEngine
 var _pid: PID
 var _clutch: Clutch
 var _clutch_load: CTorque
+var _brake_torque: float
 
 func _ready() -> void:
 	_engine = CombustionEngine.new()
@@ -38,8 +40,8 @@ func _ready() -> void:
 	_clutch = Clutch.new()
 	_clutch.data_set(
 		_engine.inertia, _engine.friction,
-		CInertia.new(2.8), CFriction.new(0.012, 0.015, 5.0),
-		_engine.τ_at_w_peak * 2.0
+		CInertia.new(1.5), CFriction.new(0.012, 0.015, 5.0),
+		_engine.τ_at_w_peak * 5.0
 		)
 	_clutch_load = CTorque.new()
 	_input_throttle.initialize("%.3f", 1.0)
@@ -61,6 +63,7 @@ func _ready() -> void:
 	_graph.set_color(2, Color.SEA_GREEN)
 	_graph.set_color(3, Color.ORANGE)
 	_graph.set_color(4, Color.ORANGE)
+	_graph.set_color(5, Color.BLUE_VIOLET)
 	await get_tree().process_frame
 	for i in Graph.POINT_COUNT:
 		var t: float = float(i) / Graph.POINT_COUNT
@@ -68,13 +71,16 @@ func _ready() -> void:
 		_graph.update_static(3, t, max(0.0, _engine.w_normalized(t)))
 
 func _physics_process(_dt_: float) -> void:
-	var usec: int = Time.get_ticks_usec()
 	_pid_collect_data(_dt_)
 	_pid.process(_dt_, _omega_error, -_omega_acceleration)
 	if _pid.active:
 		_input_throttle.value = lerp(_input_throttle.value, _pid.value, 0.5)
 	_engine.throttle = _input_throttle.value
-	_clutch.process(_dt_, usec, _engine.torque, _clutch_load.data_set(_clutch.friction_r.τ_μ(_clutch.inertia_r.ω), 0.0))
+	var step_dt: float = 1e-4
+	var step_count: int = clampi(floori((Time.get_ticks_usec() - _usec_last) * (1e-6 / 1e-4)), 0, 5 * int(_dt_ / step_dt))
+	for i in step_count:
+		_clutch.process(step_dt, _engine.torque, _clutch_load.data_set(_clutch.friction_r.τ_μ(_clutch.inertia_r.ω) + _brake_torque, 0.0))
+	_usec_last = Time.get_ticks_usec()
 
 func _process(_dt_: float) -> void:
 	_fps.text = "%d" % Engine.get_frames_per_second()
@@ -90,11 +96,14 @@ func _input_update(_dt_: float) -> void:
 		_clutch.engage = minf(_clutch.engage + 2.0 * _dt_, 1.0)
 	else:
 		_clutch.engage = maxf(_clutch.engage - 2.0 * _dt_, 0.0)
+	if Input.is_key_pressed(KEY_SPACE):
+		_brake_torque = _engine.τ_peak * 10.0
+	else:
+		_brake_torque = 0.0
 
 func _output_update(_dt_: float) -> void:
 	_output_engine_spindle.rotation += _engine.ω * _dt_
 	_output_engine_status.text = "%d W, %.1f N-m at %d RPM" % [_clutch.τ * _engine.ω, _clutch.τ, CombustionEngine.omega_to_rpm(_engine.ω)]
-	_graph.update_dynamic(4, (_clutch.τ * _engine.ω) / _engine.w_peak)
 	_output_clutch_spindle.rotation += _clutch.ω_r * _dt_
 	if Time.get_ticks_msec() - _error_rate_reset_msec > 1000:
 		_error_rate_reset_msec = Time.get_ticks_msec()
@@ -112,6 +121,8 @@ func _output_update(_dt_: float) -> void:
 	_pid_status_update()
 	_graph.update_dynamic(0, _input_throttle.value)
 	_graph.update_dynamic(1, _engine.ω / CombustionEngine.rpm_to_omega(5000.0))
+	_graph.update_dynamic(4, (_clutch.τ * _engine.ω) / _engine.w_peak)
+	_graph.update_dynamic(5, _clutch.inertia_r.ω / CombustionEngine.rpm_to_omega(5000.0))
 
 func _pid_collect_data(_dt_: float) -> void:
 	_pid.kp = _input_p.value
