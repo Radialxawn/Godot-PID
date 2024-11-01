@@ -25,7 +25,6 @@ var _omega_error: float
 var _omega_last: float
 var _omega_acceleration: float
 
-var _usec_last: int
 var _engine: CombustionEngine
 var _pid: PID
 var _clutch: Clutch
@@ -76,11 +75,7 @@ func _physics_process(_dt_: float) -> void:
 	if _pid.active:
 		_input_throttle.value = lerp(_input_throttle.value, _pid.value, 0.5)
 	_engine.throttle = _input_throttle.value
-	var step_dt: float = 1e-4
-	var step_count: int = clampi(floori((Time.get_ticks_usec() - _usec_last) * (1e-6 / 1e-4)), 0, 5 * int(_dt_ / step_dt))
-	for i in step_count:
-		_clutch.process(step_dt, _engine.torque, _clutch_load.data_set(_clutch.friction_r.τ_μ(_clutch.inertia_r.ω) + _brake_torque, 0.0))
-	_usec_last = Time.get_ticks_usec()
+	_clutch.process(_dt_, _engine.torque, _clutch_load.data_set(_clutch.friction_r.τ_μ(_clutch.inertia_r.ω) + _brake_torque, 0.0))
 
 func _process(_dt_: float) -> void:
 	_fps.text = "%d" % Engine.get_frames_per_second()
