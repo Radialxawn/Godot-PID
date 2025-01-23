@@ -1,9 +1,9 @@
 [gd_scene load_steps=11 format=3 uid="uid://cb703iasv4xtu"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_kgok3"]
+[ext_resource type="Script" uid="uid://bobxqhgxqpyhe" path="res://main.gd" id="1_kgok3"]
 [ext_resource type="Texture2D" uid="uid://cg1d5aw231jsm" path="res://flywheel.png" id="2_f7rg7"]
-[ext_resource type="Script" path="res://slider_input.gd" id="2_kuqbg"]
-[ext_resource type="Script" path="res://graph.gd" id="3_a3q30"]
+[ext_resource type="Script" uid="uid://bvgn40ut1r6qc" path="res://slider_input.gd" id="2_kuqbg"]
+[ext_resource type="Script" uid="uid://cqa62yxq8oqq0" path="res://graph.gd" id="3_a3q30"]
 [ext_resource type="AudioStream" uid="uid://ljqw2cgyifmn" path="res://engine.wav" id="4_8hrj5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ejtsy"]
@@ -360,10 +360,11 @@ stream = ExtResource("4_8hrj5")
 
 [node name="label" type="Label" parent="."]
 layout_mode = 0
-offset_left = 67.0
-offset_top = 168.0
-offset_right = 146.0
-offset_bottom = 185.0
+offset_left = 18.0
+offset_top = 162.0
+offset_right = 195.0
+offset_bottom = 199.0
 theme_override_font_sizes/font_size = 12
-text = "PRESS \"S\""
+text = "PRESS \"S\" TO START
+PRESS \"C\" TO ENGAGE CLUTCH"
 horizontal_alignment = 1
